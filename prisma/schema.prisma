@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  HOD
+  DAS
+  TRAINER
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  phoneNumber   String?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  password      String
+  role          Role      @default(TRAINER)
+  HOD           HOD?
+  DAS           DAS?
+  Trainer       Trainer?
+
+  isTwoFactorEnabled    Boolean                @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
+
+  @@map("users")
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+  @@map("verificationtokens")
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model HOD {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  departmentId String     @unique
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  @@map("hod")
+}
+
+model DAS {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("das")
+}
+
+model Trainer {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  user        User         @relation(fields: [userId], references: [id])
+  departments Department[] @relation("TrainerDepartments")
+  modules     Module[]     @relation("ModuleTrainers")
+  timetables  Timetable[]  @relation("TrainerTimetables")
+
+  @@map("trainers")
+}
+
+model Department {
+  id       String    @id @default(cuid())
+  name     String
+  hod      HOD?
+  trainers Trainer[] @relation("TrainerDepartments")
+
+  @@map("departments")
+}
+
+model Module {
+  id          String      @id @default(cuid())
+  name        String
+  code        String
+  yearOfStudy String
+  level       String
+  trainers    Trainer[]   @relation("ModuleTrainers")
+  timetables  Timetable[] @relation("ModuleTimetables")
+
+  @@map("modules")
+}
+
+model Room {
+  id         String      @id @default(cuid())
+  name       String
+  capacity   String
+  timetables Timetable[] @relation("RoomTimetables")
+
+  @@map("rooms")
+}
+
+model Timetable {
+  id        String @id @default(cuid())
+  day       String
+  timeSlot  String
+  moduleId  String
+  roomId    String
+  trainerId String
+
+  module  Module  @relation(fields: [moduleId], references: [id], name: "ModuleTimetables")
+  room    Room    @relation(fields: [roomId], references: [id], name: "RoomTimetables")
+  trainer Trainer @relation(fields: [trainerId], references: [id], name: "TrainerTimetables")
+
+  @@map("timetables")
+}
