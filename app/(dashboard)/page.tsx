@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Dashboard } from '@/components/dashboard/Dashboard';
 import { currentUser } from '@/lib/user.auth';
 import { redirect } from 'next/navigation';
 
@@ -7,8 +7,8 @@ export default async function Home() {
 
   if (!user) redirect('/auth/login');
   return (
-    <div>
-      <Button>Click me</Button>
+    <div className='h-full'>
+      <Dashboard />
     </div>
   );
 }

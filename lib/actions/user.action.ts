@@ -7,6 +7,8 @@ import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getPasswordResetTokenByToken } from '../data/password-reset-token';
+import { getTwoFactorConfirmationByUserId } from '../data/two-factor-confirmation';
+import { getTwoFactorTokenByEmail } from '../data/two-factor-token';
 import { getUserByEmail } from '../data/user';
 import { getVerificationTokenByToken } from '../data/verificiation-token';
 import {
@@ -28,8 +30,6 @@ import {
   RegisterSchemaType,
   ResetSchema,
 } from '../validation';
-import { getTwoFactorConfirmationByUserId } from '../data/two-factor-confirmation';
-import { getTwoFactorTokenByEmail } from '../data/two-factor-token';
 
 export const logout = async () => {
   await signOut();
@@ -273,3 +273,34 @@ export const register = async (values: RegisterSchemaType) => {
     success: 'User Registered Successfully 👍',
   };
 };
+export const getTrainers = async () => {
+  const users = await db.trainer.findMany({
+    include: {
+      user: true,
+      departments: true,
+      modules: true,
+    },
+  });
+  return users;
+};
+export async function DeleteUser(id: string) {
+  const user = await db.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) return { error: 'This user does not exit any more !' };
+
+  //Delete user from db
+  const deluser = await db.user.delete({
+    where: {
+      id,
+    },
+  });
+
+  if (!deluser) return { error: 'Fail to delete user !' };
+  return { success: 'User deleted successfully!' };
+}
+
+export type GetTrainersType = Awaited<ReturnType<typeof getTrainers>>;

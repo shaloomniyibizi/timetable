@@ -27,6 +27,9 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -39,6 +42,9 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("sessions")
 }
@@ -58,6 +64,9 @@ model User {
   DAS           DAS?
   Trainer       Trainer?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
 
@@ -70,6 +79,9 @@ model VerificationToken {
   token   String   @unique
   expires DateTime
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([email, token])
   @@map("verificationtokens")
 }
@@ -80,6 +92,9 @@ model PasswordResetToken {
   token   String   @unique
   expires DateTime
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([email, token])
 }
 
@@ -89,11 +104,17 @@ model TwoFactorToken {
   token   String   @unique
   expires DateTime
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([email, token])
 }
 
 model TwoFactorConfirmation {
   id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -108,6 +129,9 @@ model HOD {
   departmentId String     @unique
   department   Department @relation(fields: [departmentId], references: [id])
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("hod")
 }
 
@@ -115,6 +139,9 @@ model DAS {
   id     String @id @default(cuid())
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("das")
 }
@@ -127,6 +154,9 @@ model Trainer {
   modules     Module[]     @relation("ModuleTrainers")
   timetables  Timetable[]  @relation("TrainerTimetables")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("trainers")
 }
 
@@ -135,6 +165,9 @@ model Department {
   name     String
   hod      HOD?
   trainers Trainer[] @relation("TrainerDepartments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("departments")
 }
@@ -148,6 +181,9 @@ model Module {
   trainers    Trainer[]   @relation("ModuleTrainers")
   timetables  Timetable[] @relation("ModuleTimetables")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("modules")
 }
 
@@ -156,6 +192,9 @@ model Room {
   name       String
   capacity   String
   timetables Timetable[] @relation("RoomTimetables")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("rooms")
 }
@@ -171,6 +210,9 @@ model Timetable {
   module  Module  @relation(fields: [moduleId], references: [id], name: "ModuleTimetables")
   room    Room    @relation(fields: [roomId], references: [id], name: "RoomTimetables")
   trainer Trainer @relation(fields: [trainerId], references: [id], name: "TrainerTimetables")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("timetables")
 }
