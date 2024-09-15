@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { SideBarMenu } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 const SideBar = () => {
-  const isActive = false;
+  const path = usePathname();
   return (
     <div className='flex h-full max-h-screen flex-col gap-2'>
       <div className='flex h-14 w-full items-center border-b px-4 lg:h-[60px] lg:px-6'>
@@ -27,7 +28,7 @@ const SideBar = () => {
               href={menu.href}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                isActive && 'bg-muted'
+                path === menu.href && 'bg-muted'
               )}
             >
               {menu.icon}
