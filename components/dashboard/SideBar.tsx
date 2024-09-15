@@ -32,6 +32,7 @@ const SideBar = () => {
               )}
             >
               {menu.icon}
+
               {menu.title}
             </Link>
           ))}
