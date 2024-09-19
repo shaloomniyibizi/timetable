@@ -33,7 +33,7 @@ function generateBreadcrumbItems(pathname: string): BreadcrumbItem[] {
   const pathSegments = pathname.split('/').filter(Boolean); // Remove empty segments
   return pathSegments.map((segment, index) => ({
     name: capitalizeFirstLetter(segment), // Optionally capitalize names
-    path: `/${pathSegments.slice(0, index + 1).join('/')}`,
+    path: `/${pathSegments.slice(1, index + 1).join('/')}`,
   }));
 }
 

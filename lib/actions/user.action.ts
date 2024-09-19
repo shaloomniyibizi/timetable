@@ -273,16 +273,7 @@ export const register = async (values: RegisterSchemaType) => {
     success: 'User Registered Successfully 👍',
   };
 };
-export const getTrainers = async () => {
-  const users = await db.trainer.findMany({
-    include: {
-      user: true,
-      departments: true,
-      modules: true,
-    },
-  });
-  return users;
-};
+
 export async function DeleteUser(id: string) {
   const user = await db.user.findUnique({
     where: {
@@ -302,5 +293,3 @@ export async function DeleteUser(id: string) {
   if (!deluser) return { error: 'Fail to delete user !' };
   return { success: 'User deleted successfully!' };
 }
-
-export type GetTrainersType = Awaited<ReturnType<typeof getTrainers>>;

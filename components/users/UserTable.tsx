@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getTrainers, GetTrainersType } from '@/lib/actions/user.action';
+import { getTrainers, GetTrainersType } from '@/lib/actions/trainer.action';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -153,8 +153,8 @@ function UserTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data: users, isLoading } = useQuery<GetTrainersType>({
-    queryKey: ['users'],
+  const { data: trainers, isLoading } = useQuery<GetTrainersType>({
+    queryKey: ['trainers'],
     queryFn: async () => await getTrainers(),
   });
 
@@ -164,7 +164,7 @@ function UserTable() {
   };
 
   const table = useReactTable({
-    data: users || emptyData,
+    data: trainers || emptyData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     initialState: {
@@ -185,7 +185,7 @@ function UserTable() {
 
   const nameOptions = useMemo(() => {
     const nameMap = new Map();
-    users?.forEach((user) => {
+    trainers?.forEach((user) => {
       nameMap.set(user.user.name, {
         value: user.user.name,
         label: `${user.user.name}`,
@@ -193,11 +193,11 @@ function UserTable() {
     });
     const uniquName = new Set(nameMap.values());
     return Array.from(uniquName);
-  }, [users]);
+  }, [trainers]);
 
   const departmentOptions = useMemo(() => {
     const departmentMap = new Map();
-    users?.forEach((user) => {
+    trainers?.forEach((user) => {
       departmentMap.set(user?.user.name, {
         value: user.user.name,
         label: user.user.name,
@@ -205,10 +205,10 @@ function UserTable() {
     });
     const uniquDepartment = new Set(departmentMap.values());
     return Array.from(uniquDepartment);
-  }, [users]);
+  }, [trainers]);
   const roleOptions = useMemo(() => {
     const roleMap = new Map();
-    users?.forEach((user) => {
+    trainers?.forEach((user) => {
       roleMap.set(user.user.role, {
         value: user.user.role,
         label: user.user.role,
@@ -216,7 +216,7 @@ function UserTable() {
     });
     const uniquRole = new Set(roleMap.values());
     return Array.from(uniquRole);
-  }, [users]);
+  }, [trainers]);
 
   return (
     <div className='w-full'>
@@ -277,7 +277,7 @@ function UserTable() {
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isLoading} fullWidth={false}>
             <Button asChild size='sm' className='h-8 gap-1'>
-              <Link href={'/users/add'}>
+              <Link href={'/trainers/add'}>
                 <PlusCircle className='h-3.5 w-3.5' />
                 <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
                   Add New
