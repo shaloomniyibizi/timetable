@@ -181,7 +181,7 @@ const AddTrainerForm = () => {
           </CardContent>
           <CardFooter className='border-t px-6 py-4'>
             <Button disabled={isPending} type='submit' className='w-full'>
-              {isPending ? <BeatLoader /> : 'Login'}
+              {isPending ? <BeatLoader /> : 'Add Trainer'}
             </Button>
           </CardFooter>
         </Card>
