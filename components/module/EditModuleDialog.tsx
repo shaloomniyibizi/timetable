@@ -12,12 +12,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
 
-interface DeleteUserDialogProps {
+interface EditModuleDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  userId: string;
+  moduleId: string;
 }
-function DeleteUserDialog({ open, setOpen, userId }: DeleteUserDialogProps) {
+function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
   const router = useRouter();
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -25,14 +25,14 @@ function DeleteUserDialog({ open, setOpen, userId }: DeleteUserDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You want to edit this user.
+            You want to edit this module.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              router.push(`/trainers/edit/${userId}`);
+              router.push(`/modules/edit/${moduleId}`);
             }}
           >
             Continue
@@ -43,4 +43,4 @@ function DeleteUserDialog({ open, setOpen, userId }: DeleteUserDialogProps) {
   );
 }
 
-export default DeleteUserDialog;
+export default EditModuleDialog;

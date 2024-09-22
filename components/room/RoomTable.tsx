@@ -2,7 +2,6 @@
 
 import { DataTableColumnHeader } from '@/components/datatable/ColumnHeader';
 import { ColumnToggle } from '@/components/datatable/ColumnToggle';
-import { DataTableFacetedFilter } from '@/components/datatable/FacetedFilter';
 import SkeletonWrapper from '@/components/shared/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getTrainers, GetTrainersType } from '@/lib/actions/trainer.action';
-import { cn } from '@/lib/utils';
+import { getRooms, GetRoomsType } from '@/lib/actions/room.action';
 import { useQuery } from '@tanstack/react-query';
 import {
   ColumnDef,
@@ -44,102 +42,40 @@ import {
   TrashIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import DeleteUserDialog from './DeleteTrainerDialog';
-import EditUserDialog from './EditUserDialog';
+import { useState } from 'react';
+import DeleteRoomDialog from './DeleteRoomDialog';
+import EditRoomDialog from './EditRoomDialog';
 
 const emptyData: any[] = [];
 
-type TrainerRow = GetTrainersType[0];
+type RoomRow = GetRoomsType[0];
 
-const columns: ColumnDef<TrainerRow>[] = [
+const columns: ColumnDef<RoomRow>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
+      <DataTableColumnHeader column={column} title='Room Name' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.user.name}</div>
+      <div className='text-nowrap capitalize'>{row.original.name}</div>
     ),
   },
   {
-    accessorKey: 'email',
+    accessorKey: 'capacity',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Email' />
+      <DataTableColumnHeader column={column} title='Capacity' />
     ),
     cell: ({ row }) => (
-      <div className='line-clamp-3 text-justify'>
-        {row.original.user.email!}
-      </div>
-    ),
-  },
-
-  {
-    accessorKey: 'department',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Department' />
-    ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-    cell: ({ row }) => (
-      <ul className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.departments.map((dept, i) => (
-          <li key={i}> {dept.name}</li>
-        ))}
-      </ul>
-    ),
-  },
-  {
-    accessorKey: 'modules',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Modules' />
-    ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-    cell: ({ row }) => (
-      <ul className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.modules.map((module, i) => (
-          <li key={i}>
-            {module.name}({module.code}) - Level {module.level}
-          </li>
-        ))}
-      </ul>
-    ),
-  },
-  {
-    accessorKey: 'role',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Role' />
-    ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-    cell: ({ row }) => (
-      <div className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.user.role}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'phoneNumber',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='phoneNumber' />
-    ),
-    cell: ({ row }) => (
-      <p className='text-nowrap rounded p-2 text-center font-medium'>
-        {row.original.user.phoneNumber}
-      </p>
+      <div className='text-nowrap capitalize'>{row.original.capacity!}</div>
     ),
   },
   {
     id: 'actions',
     enableHiding: false,
-    cell: ({ row }) => <RowActions user={row.original} />,
+    cell: ({ row }) => <RowActions room={row.original} />,
   },
 ];
 
@@ -149,13 +85,13 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
 });
 
-function UserTable() {
+function RoomTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data: trainers, isFetching } = useQuery<GetTrainersType>({
-    queryKey: ['trainers'],
-    queryFn: async () => await getTrainers(),
+  const { data: rooms, isFetching } = useQuery<GetRoomsType>({
+    queryKey: ['rooms'],
+    queryFn: async () => await getRooms(),
   });
 
   const handleExportCSV = (data: any[]) => {
@@ -164,7 +100,7 @@ function UserTable() {
   };
 
   const table = useReactTable({
-    data: trainers || emptyData,
+    data: rooms || emptyData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     initialState: {
@@ -183,51 +119,43 @@ function UserTable() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const departmentOptions = useMemo(() => {
-    const departmentMap = new Map();
-    trainers?.forEach((user) => {
-      departmentMap.set(user?.user.name, {
-        value: user.user.name,
-        label: user.user.name,
-      });
-    });
-    const uniquDepartment = new Set(departmentMap.values());
-    return Array.from(uniquDepartment);
-  }, [trainers]);
+  // const levelOptions = useMemo(() => {
+  //   const levelMap = new Map();
+  //   rooms?.forEach((room) => {
+  //     levelMap.set(room?.level, {
+  //       value: room.level,
+  //       label: room.level,
+  //     });
+  //   });
+  //   const uniqueLevel = new Set(levelMap.values());
+  //   return Array.from(uniqueLevel);
+  // }, [rooms]);
 
-  const roleOptions = useMemo(() => {
-    const roleMap = new Map();
-    trainers?.forEach((user) => {
-      roleMap.set(user.user.role, {
-        value: user.user.role,
-        label: user.user.role,
-      });
-    });
-    const uniquRole = new Set(roleMap.values());
-    return Array.from(uniquRole);
-  }, [trainers]);
+  // const yearOptions = useMemo(() => {
+  //   const yearMap = new Map();
+  //   rooms?.forEach((room) => {
+  //     yearMap.set(room.yearOfStudy, {
+  //       value: room.yearOfStudy,
+  //       label: room.yearOfStudy,
+  //     });
+  //   });
+  //   const uniqueYear = new Set(yearMap.values());
+  //   return Array.from(uniqueYear);
+  // }, [rooms]);
 
   return (
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
         <div className='flex gap-2'>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('department') && (
+            {/* {table.getColumn('level') && (
               <DataTableFacetedFilter
-                options={departmentOptions}
-                title='Department'
-                column={table.getColumn('department')}
+                options={levelOptions}
+                title='Level'
+                column={table.getColumn('level')}
               />
-            )}
-          </SkeletonWrapper>
-          <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('role') && (
-              <DataTableFacetedFilter
-                options={roleOptions}
-                title='Role'
-                column={table.getColumn('role')}
-              />
-            )}
+            )} */}
+            <div className=''></div>
           </SkeletonWrapper>
         </div>
         <div className='flex flex-wrap gap-2'>
@@ -244,8 +172,8 @@ function UserTable() {
                   NO: row.original.id,
                   TITLE: row.original.name,
                   EMAIL: row.original.email,
-                  STUTUS: row.original.role,
-                  DEPARTMENT: row.original.Department.name,
+                  STUTUS: row.original.year,
+                  LEVEL: row.original.Level.name,
                   PHONE: row.original.phoneNumber,
                   DATE: row.original.createdAt,
                 }));
@@ -257,7 +185,7 @@ function UserTable() {
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
             <Button asChild size='sm' className='h-8 gap-1'>
-              <Link href={'/trainers/add'}>
+              <Link href={'/rooms/add'}>
                 <PlusCircle className='h-3.5 w-3.5' />
                 <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
                   Add New
@@ -341,23 +269,23 @@ function UserTable() {
   );
 }
 
-export default UserTable;
+export default RoomTable;
 
-function RowActions({ user }: { user: TrainerRow }) {
+function RowActions({ room }: { room: RoomRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   return (
     <>
-      <DeleteUserDialog
+      <DeleteRoomDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
-        trainerId={user.id}
+        roomId={room.id}
       />
-      <EditUserDialog
+      <EditRoomDialog
         open={showEditDialog}
         setOpen={setShowEditDialog}
-        userId={user.id}
+        roomId={room.id}
       />
       <DropdownMenu>
         <div className='flex w-full items-center justify-center'>

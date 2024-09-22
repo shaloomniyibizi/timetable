@@ -28,7 +28,7 @@ const UserButton = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem className='flex items-center gap-2'>
           <Settings className='h-4 w-4' />
-          <Link href={'/dashboard/settings'}>Settings</Link>
+          <Link href={'/settings'}>Settings</Link>
         </DropdownMenuItem>
         <DropdownMenuItem className='flex items-center gap-2'>
           <HelpCircle className='h-4 w-4' />

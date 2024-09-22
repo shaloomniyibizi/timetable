@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getTrainers, GetTrainersType } from '@/lib/actions/trainer.action';
+import { getModules, GetModulesType } from '@/lib/actions/module.action';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -45,101 +45,78 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import DeleteUserDialog from './DeleteTrainerDialog';
-import EditUserDialog from './EditUserDialog';
+import DeleteModuleDialog from './DeleteModuleDialog';
+import EditModuleDialog from './EditModuleDialog';
 
 const emptyData: any[] = [];
 
-type TrainerRow = GetTrainersType[0];
+type ModuleRow = GetModulesType[0];
 
-const columns: ColumnDef<TrainerRow>[] = [
+const columns: ColumnDef<ModuleRow>[] = [
+  {
+    accessorKey: 'code',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Module Code' />
+    ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>{row.original.code}</div>
+    ),
+  },
   {
     accessorKey: 'name',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Name' />
     ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
     cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.user.name}</div>
-    ),
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Email' />
-    ),
-    cell: ({ row }) => (
-      <div className='line-clamp-3 text-justify'>
-        {row.original.user.email!}
-      </div>
+      <div className='text-nowrap capitalize'>{row.original.name!}</div>
     ),
   },
 
   {
-    accessorKey: 'department',
+    accessorKey: 'level',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Department' />
+      <DataTableColumnHeader column={column} title='Level' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <ul className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.departments.map((dept, i) => (
-          <li key={i}> {dept.name}</li>
-        ))}
-      </ul>
+      <div className='text-nowrap capitalize'>{row.original.level}</div>
     ),
   },
   {
-    accessorKey: 'modules',
+    accessorKey: 'yearOfStudy',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Modules' />
+      <DataTableColumnHeader column={column} title='Year Of Study' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <ul className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.modules.map((module, i) => (
-          <li key={i}>
-            {module.name}({module.code}) - Level {module.level}
-          </li>
-        ))}
-      </ul>
+      <div className='text-nowrap capitalize'>{row.original.yearOfStudy}</div>
     ),
   },
   {
-    accessorKey: 'role',
+    accessorKey: 'trainer',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Role' />
+      <DataTableColumnHeader column={column} title='Trainer' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
       <div className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.user.role}
+        {row.original.trainer.user.name}
       </div>
-    ),
-  },
-  {
-    accessorKey: 'phoneNumber',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='phoneNumber' />
-    ),
-    cell: ({ row }) => (
-      <p className='text-nowrap rounded p-2 text-center font-medium'>
-        {row.original.user.phoneNumber}
-      </p>
     ),
   },
   {
     id: 'actions',
     enableHiding: false,
-    cell: ({ row }) => <RowActions user={row.original} />,
+    cell: ({ row }) => <RowActions module={row.original} />,
   },
 ];
 
@@ -149,13 +126,13 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
 });
 
-function UserTable() {
+function ModuleTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data: trainers, isFetching } = useQuery<GetTrainersType>({
-    queryKey: ['trainers'],
-    queryFn: async () => await getTrainers(),
+  const { data: modules, isFetching } = useQuery<GetModulesType>({
+    queryKey: ['modules'],
+    queryFn: async () => await getModules(),
   });
 
   const handleExportCSV = (data: any[]) => {
@@ -164,7 +141,7 @@ function UserTable() {
   };
 
   const table = useReactTable({
-    data: trainers || emptyData,
+    data: modules || emptyData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     initialState: {
@@ -183,49 +160,49 @@ function UserTable() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const departmentOptions = useMemo(() => {
-    const departmentMap = new Map();
-    trainers?.forEach((user) => {
-      departmentMap.set(user?.user.name, {
-        value: user.user.name,
-        label: user.user.name,
+  const levelOptions = useMemo(() => {
+    const levelMap = new Map();
+    modules?.forEach((module) => {
+      levelMap.set(module?.level, {
+        value: module.level,
+        label: module.level,
       });
     });
-    const uniquDepartment = new Set(departmentMap.values());
-    return Array.from(uniquDepartment);
-  }, [trainers]);
+    const uniqueLevel = new Set(levelMap.values());
+    return Array.from(uniqueLevel);
+  }, [modules]);
 
-  const roleOptions = useMemo(() => {
-    const roleMap = new Map();
-    trainers?.forEach((user) => {
-      roleMap.set(user.user.role, {
-        value: user.user.role,
-        label: user.user.role,
+  const yearOptions = useMemo(() => {
+    const yearMap = new Map();
+    modules?.forEach((module) => {
+      yearMap.set(module.yearOfStudy, {
+        value: module.yearOfStudy,
+        label: module.yearOfStudy,
       });
     });
-    const uniquRole = new Set(roleMap.values());
-    return Array.from(uniquRole);
-  }, [trainers]);
+    const uniqueYear = new Set(yearMap.values());
+    return Array.from(uniqueYear);
+  }, [modules]);
 
   return (
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
         <div className='flex gap-2'>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('department') && (
+            {table.getColumn('level') && (
               <DataTableFacetedFilter
-                options={departmentOptions}
-                title='Department'
-                column={table.getColumn('department')}
+                options={levelOptions}
+                title='Level'
+                column={table.getColumn('level')}
               />
             )}
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('role') && (
+            {table.getColumn('yearOfStudy') && (
               <DataTableFacetedFilter
-                options={roleOptions}
-                title='Role'
-                column={table.getColumn('role')}
+                options={yearOptions}
+                title='Year Of Study'
+                column={table.getColumn('yearOfStudy')}
               />
             )}
           </SkeletonWrapper>
@@ -244,8 +221,8 @@ function UserTable() {
                   NO: row.original.id,
                   TITLE: row.original.name,
                   EMAIL: row.original.email,
-                  STUTUS: row.original.role,
-                  DEPARTMENT: row.original.Department.name,
+                  STUTUS: row.original.year,
+                  LEVEL: row.original.Level.name,
                   PHONE: row.original.phoneNumber,
                   DATE: row.original.createdAt,
                 }));
@@ -257,7 +234,7 @@ function UserTable() {
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
             <Button asChild size='sm' className='h-8 gap-1'>
-              <Link href={'/trainers/add'}>
+              <Link href={'/modules/add'}>
                 <PlusCircle className='h-3.5 w-3.5' />
                 <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
                   Add New
@@ -341,23 +318,23 @@ function UserTable() {
   );
 }
 
-export default UserTable;
+export default ModuleTable;
 
-function RowActions({ user }: { user: TrainerRow }) {
+function RowActions({ module }: { module: ModuleRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   return (
     <>
-      <DeleteUserDialog
+      <DeleteModuleDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
-        trainerId={user.id}
+        moduleId={module.id}
       />
-      <EditUserDialog
+      <EditModuleDialog
         open={showEditDialog}
         setOpen={setShowEditDialog}
-        userId={user.id}
+        moduleId={module.id}
       />
       <DropdownMenu>
         <div className='flex w-full items-center justify-center'>

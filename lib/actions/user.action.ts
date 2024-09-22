@@ -273,23 +273,3 @@ export const register = async (values: RegisterSchemaType) => {
     success: 'User Registered Successfully 👍',
   };
 };
-
-export async function DeleteUser(id: string) {
-  const user = await db.user.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!user) return { error: 'This user does not exit any more !' };
-
-  //Delete user from db
-  const deluser = await db.user.delete({
-    where: {
-      id,
-    },
-  });
-
-  if (!deluser) return { error: 'Fail to delete user !' };
-  return { success: 'User deleted successfully!' };
-}

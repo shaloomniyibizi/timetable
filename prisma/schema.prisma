@@ -58,10 +58,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  password      String
+  password      String?
   role          Role      @default(TRAINER)
-  HOD           HOD?
-  DAS           DAS?
   Trainer       Trainer?
 
   createdAt DateTime @default(now())
@@ -122,36 +120,12 @@ model TwoFactorConfirmation {
   @@unique([userId])
 }
 
-model HOD {
-  id           String     @id @default(cuid())
-  userId       String     @unique
-  user         User       @relation(fields: [userId], references: [id])
-  departmentId String     @unique
-  department   Department @relation(fields: [departmentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("hod")
-}
-
-model DAS {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("das")
-}
-
 model Trainer {
   id          String       @id @default(cuid())
   userId      String       @unique
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   departments Department[] @relation("TrainerDepartments")
-  modules     Module[]     @relation("ModuleTrainers")
+  modules     Module[]
   timetables  Timetable[]  @relation("TrainerTimetables")
 
   createdAt DateTime @default(now())
@@ -163,7 +137,6 @@ model Trainer {
 model Department {
   id       String    @id @default(cuid())
   name     String
-  hod      HOD?
   trainers Trainer[] @relation("TrainerDepartments")
 
   createdAt DateTime @default(now())
@@ -178,7 +151,8 @@ model Module {
   code        String
   yearOfStudy String
   level       String
-  trainers    Trainer[]   @relation("ModuleTrainers")
+  trainerId   String
+  trainer     Trainer     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
   timetables  Timetable[] @relation("ModuleTimetables")
 
   createdAt DateTime @default(now())

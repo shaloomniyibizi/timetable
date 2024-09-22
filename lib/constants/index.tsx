@@ -33,12 +33,6 @@ export const SideBarMenu = [
   },
   {
     role: 'DAS',
-    title: 'HOD',
-    icon: <School className='transition-all group-hover:scale-110' />,
-    href: '/hod',
-  },
-  {
-    role: 'DAS',
     title: 'Time Table',
     icon: <AlarmClock className='transition-all group-hover:scale-110' />,
     href: '/timetable',

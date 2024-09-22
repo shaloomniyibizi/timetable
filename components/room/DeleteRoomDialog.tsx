@@ -10,29 +10,45 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
+import { DeleteRoom } from '@/lib/actions/room.action';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
-interface DeleteUserDialogProps {
+interface DeleteRoomDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  userId: string;
+  roomId: string;
 }
-function DeleteUserDialog({ open, setOpen, userId }: DeleteUserDialogProps) {
-  const router = useRouter();
+function DeleteRoomDialog({ open, setOpen, roomId }: DeleteRoomDialogProps) {
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: DeleteRoom,
+    onSuccess: async (data) => {
+      toast.success(data.success);
+
+      queryClient.invalidateQueries({
+        queryKey: ['rooms'],
+      });
+    },
+    onError: (error) => {
+      toast.success(error.message);
+    },
+  });
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You want to edit this user.
+            This action can not ne undone. This will permenently delete this
+            room
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              router.push(`/trainers/edit/${userId}`);
+              deleteMutation.mutate(roomId);
             }}
           >
             Continue
@@ -43,4 +59,4 @@ function DeleteUserDialog({ open, setOpen, userId }: DeleteUserDialogProps) {
   );
 }
 
-export default DeleteUserDialog;
+export default DeleteRoomDialog;

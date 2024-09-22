@@ -2,9 +2,14 @@
 
 import { db } from '@/lib/database/db';
 
+import { getUserByEmail, getUserById } from '@/lib/data/user';
+import { currentUser } from '@/lib/user.auth';
+import {
+  EditTrainerSchemaType,
+  TrainerSchema,
+  TrainerSchemaType,
+} from '@/lib/validation/trainer';
 import bcrypt from 'bcryptjs';
-import { getUserByEmail } from '../data/user';
-import { TrainerSchema, TrainerSchemaType } from '../validation';
 
 export const getTrainers = async () => {
   const trainers = await db.trainer.findMany({
@@ -16,6 +21,17 @@ export const getTrainers = async () => {
   });
   return trainers;
 };
+export const getTrainerById = async (trainerId: string) => {
+  const trainer = await db.trainer.findUnique({
+    where: { id: trainerId },
+    include: {
+      user: true,
+      departments: true,
+      modules: true,
+    },
+  });
+  return trainer;
+};
 
 export const addTrainer = async (values: TrainerSchemaType) => {
   const validatedFields = TrainerSchema.safeParse(values);
@@ -24,7 +40,7 @@ export const addTrainer = async (values: TrainerSchemaType) => {
     return { error: 'Invalid fields!' };
   }
 
-  const { name, email, phoneNumber, password, departmentId } =
+  const { name, email, phoneNumber, password, departmentId, role } =
     validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -41,7 +57,7 @@ export const addTrainer = async (values: TrainerSchemaType) => {
         phoneNumber,
         name,
         password: hashedPassword,
-        role: 'TRAINER',
+        role,
         emailVerified: new Date(), // manual email verification
       },
     });
@@ -60,13 +76,75 @@ export const addTrainer = async (values: TrainerSchemaType) => {
   });
   if (!addTrainer) return { error: 'Fail to add New trainer !' };
 
-  // const verificationToken = await generateVerificationToken(email);
-  // await sendVerificationEmail(verificationToken.email, verificationToken.token);
-  // if (trainer) redirect("/onboarding");
-
   return {
     success: 'Trainer AddTrainered Successfully 👍',
   };
 };
 
+export const editTrainer = async (values: EditTrainerSchemaType) => {
+  const user = await currentUser();
+
+  if (!user) {
+    return { error: 'Unauthorized' };
+  }
+
+  const dbUser = await getUserById(user.id as string);
+
+  if (!dbUser) {
+    return { error: 'Unauthorized' };
+  }
+
+  if (values.email && values.email !== user.email) {
+    const existingUser = await getUserByEmail(values.email);
+
+    if (existingUser && existingUser.id !== user.id) {
+      return { error: 'Email already in use!' };
+    }
+  }
+
+  if (user.isOAuth) {
+    values.email = user.email!;
+  }
+
+  const updatedUser = await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      ...values,
+    },
+  });
+
+  return { success: 'User Account Updated !' };
+};
+
+export async function DeleteTrainer(id: string) {
+  const trainer = await db.trainer.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!trainer) return { error: 'This trainer does not exit any more !' };
+
+  //Delete trainer from db
+  const deltrainer = await db.$transaction(async (txt) => {
+    const tr = await txt.trainer.delete({
+      where: {
+        id,
+      },
+    });
+
+    const user = await txt.user.delete({
+      where: {
+        id: tr.userId,
+      },
+    });
+
+    return tr;
+  });
+
+  if (!deltrainer) return { error: 'Fail to delete trainer !' };
+  return { success: 'Trainer deleted successfully!' };
+}
+
 export type GetTrainersType = Awaited<ReturnType<typeof getTrainers>>;
+export type GetTrainerByIdType = Awaited<ReturnType<typeof getTrainerById>>;
