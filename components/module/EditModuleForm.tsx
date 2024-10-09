@@ -89,7 +89,6 @@ const EditModuleForm = ({ module }: Props) => {
       code: module?.code || undefined,
       level: module?.level || undefined,
       trainerId: module?.trainerId || undefined,
-      yearOfStudy: module?.yearOfStudy || undefined,
     },
   });
 

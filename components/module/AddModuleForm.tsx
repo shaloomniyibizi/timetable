@@ -85,7 +85,6 @@ const AddModuleForm = () => {
       code: '',
       level: '',
       trainerId: '',
-      yearOfStudy: '',
     },
   });
 
@@ -123,14 +122,6 @@ const AddModuleForm = () => {
               name='code'
               placeholder='Enter Module Code'
               label='Module Code'
-              disabled={isPending}
-            />
-            <CustomFormField
-              fieldType={FormFieldType.INPUT}
-              control={form.control}
-              name='yearOfStudy'
-              placeholder='Enter Year Of Study'
-              label='Enter Year Of Study'
               disabled={isPending}
             />
             <FormField

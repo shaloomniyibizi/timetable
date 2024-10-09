@@ -17,7 +17,7 @@ import { toast } from 'react-toastify';
 interface DeleteModuleDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  moduleId: string;
+  moduleId: number;
 }
 function DeleteModuleDialog({
   open,

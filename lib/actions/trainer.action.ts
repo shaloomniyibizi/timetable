@@ -15,7 +15,7 @@ export const getTrainers = async () => {
   const trainers = await db.trainer.findMany({
     include: {
       user: true,
-      departments: true,
+      department: true,
       modules: true,
     },
   });
@@ -26,7 +26,7 @@ export const getTrainerById = async (trainerId: string) => {
     where: { id: trainerId },
     include: {
       user: true,
-      departments: true,
+      department: true,
       modules: true,
     },
   });
@@ -65,11 +65,7 @@ export const addTrainer = async (values: TrainerSchemaType) => {
     await txt.trainer.create({
       data: {
         userId: newTrainer.id,
-        departments: {
-          connect: {
-            id: departmentId,
-          },
-        },
+        departmentId,
       },
     });
     return newTrainer;

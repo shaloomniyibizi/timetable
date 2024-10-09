@@ -86,11 +86,9 @@ const columns: ColumnDef<TrainerRow>[] = [
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <ul className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.departments.map((dept, i) => (
-          <li key={i}> {dept.name}</li>
-        ))}
-      </ul>
+      <div className={cn('rounded-lg p-2 text-center capitalize')}>
+        {row.original.department.name}
+      </div>
     ),
   },
   {

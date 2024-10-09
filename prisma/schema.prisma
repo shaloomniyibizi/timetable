@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  HOD
-  DAS
-  TRAINER
-}
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -51,24 +45,124 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String
   email         String?   @unique
-  emailVerified DateTime?
-  phoneNumber   String?
+  phoneNumber   String?   @unique
+  address       String?
   image         String?
+  sex           UserSex?
+  password      String?
+  role          Role      @default(STUDENT)
+  birthday      DateTime?
+  emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
-  password      String?
-  role          Role      @default(TRAINER)
-  Trainer       Trainer?
+  trainer       Trainer?
+  student       Student?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  isTwoFactorEnabled    Boolean                @default(false)
-  twoFactorConfirmation TwoFactorConfirmation?
-
   @@map("users")
+}
+
+model Student {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  roomId       Int
+  room         Room       @relation(fields: [roomId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Trainer {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  modules      Module[]
+  lessons      Lesson[]
+  rooms        Room[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("trainers")
+}
+
+model Department {
+  id      String    @id @default(cuid())
+  name    String
+  trainer Trainer[]
+  student Student[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("departments")
+}
+
+model Room {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  capacity       Int
+  supervisorId   String?
+  supervisor     Trainer?         @relation(fields: [supervisorId], references: [id])
+  students       Student[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  TimetableEntry TimetableEntry[]
+
+  @@map("rooms")
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  code      String   @unique
+  level     String
+  trainerId String?
+  trainer   Trainer? @relation(fields: [trainerId], references: [id])
+  lessons   Lesson[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("modules")
+}
+
+model Lesson {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  moduleId       Int
+  module         Module           @relation(fields: [moduleId], references: [id])
+  trainerId      String
+  trainer        Trainer          @relation(fields: [trainerId], references: [id])
+  TimetableEntry TimetableEntry[]
+}
+
+model TimeSlot {
+  id             Int              @id @default(autoincrement())
+  day            Day
+  startTime      DateTime
+  endTime        DateTime
+  TimetableEntry TimetableEntry[]
+}
+
+model TimetableEntry {
+  id         Int      @id @default(autoincrement())
+  lessonId   Int
+  roomId     Int
+  timeSlotId Int
+  lesson     Lesson   @relation(fields: [lessonId], references: [id])
+  room       Room     @relation(fields: [roomId], references: [id])
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id])
 }
 
 model VerificationToken {
@@ -96,97 +190,22 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
-model TwoFactorToken {
-  id      String   @id @default(cuid())
-  email   String
-  token   String   @unique
-  expires DateTime
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([email, token])
+enum Role {
+  HOD
+  DAS
+  TRAINER
+  STUDENT
 }
 
-model TwoFactorConfirmation {
-  id String @id @default(cuid())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId])
+enum UserSex {
+  MALE
+  FEMALE
 }
 
-model Trainer {
-  id          String       @id @default(cuid())
-  userId      String       @unique
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  departments Department[] @relation("TrainerDepartments")
-  modules     Module[]
-  timetables  Timetable[]  @relation("TrainerTimetables")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("trainers")
-}
-
-model Department {
-  id       String    @id @default(cuid())
-  name     String
-  trainers Trainer[] @relation("TrainerDepartments")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("departments")
-}
-
-model Module {
-  id          String      @id @default(cuid())
-  name        String
-  code        String
-  yearOfStudy String
-  level       String
-  trainerId   String
-  trainer     Trainer     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  timetables  Timetable[] @relation("ModuleTimetables")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("modules")
-}
-
-model Room {
-  id         String      @id @default(cuid())
-  name       String
-  capacity   String
-  timetables Timetable[] @relation("RoomTimetables")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("rooms")
-}
-
-model Timetable {
-  id        String @id @default(cuid())
-  day       String
-  timeSlot  String
-  moduleId  String
-  roomId    String
-  trainerId String
-
-  module  Module  @relation(fields: [moduleId], references: [id], name: "ModuleTimetables")
-  room    Room    @relation(fields: [roomId], references: [id], name: "RoomTimetables")
-  trainer Trainer @relation(fields: [trainerId], references: [id], name: "TrainerTimetables")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("timetables")
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
 }

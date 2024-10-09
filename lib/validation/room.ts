@@ -5,7 +5,7 @@ export const RoomSchema = z.object({
     .min(1, 'room name is required')
     .min(2, 'room name must be more than 2 characters'),
   capacity: z
-    .string({ required_error: 'room code is required' })
+    .number({ required_error: 'room code is required' })
     .min(1, 'room code is required')
     .min(3, 'room code must be more than 2 characters'),
 });

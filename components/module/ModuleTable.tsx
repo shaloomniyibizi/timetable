@@ -88,18 +88,6 @@ const columns: ColumnDef<ModuleRow>[] = [
     ),
   },
   {
-    accessorKey: 'yearOfStudy',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Year Of Study' />
-    ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-    cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.yearOfStudy}</div>
-    ),
-  },
-  {
     accessorKey: 'trainer',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Trainer' />
@@ -109,7 +97,7 @@ const columns: ColumnDef<ModuleRow>[] = [
     },
     cell: ({ row }) => (
       <div className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.trainer.user.name}
+        {row.original.trainer?.user.name}
       </div>
     ),
   },
@@ -172,18 +160,6 @@ function ModuleTable() {
     return Array.from(uniqueLevel);
   }, [modules]);
 
-  const yearOptions = useMemo(() => {
-    const yearMap = new Map();
-    modules?.forEach((module) => {
-      yearMap.set(module.yearOfStudy, {
-        value: module.yearOfStudy,
-        label: module.yearOfStudy,
-      });
-    });
-    const uniqueYear = new Set(yearMap.values());
-    return Array.from(uniqueYear);
-  }, [modules]);
-
   return (
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
@@ -194,15 +170,6 @@ function ModuleTable() {
                 options={levelOptions}
                 title='Level'
                 column={table.getColumn('level')}
-              />
-            )}
-          </SkeletonWrapper>
-          <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('yearOfStudy') && (
-              <DataTableFacetedFilter
-                options={yearOptions}
-                title='Year Of Study'
-                column={table.getColumn('yearOfStudy')}
               />
             )}
           </SkeletonWrapper>

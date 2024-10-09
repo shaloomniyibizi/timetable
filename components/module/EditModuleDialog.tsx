@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 interface EditModuleDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  moduleId: string;
+  moduleId: number;
 }
 function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
   const router = useRouter();

@@ -17,7 +17,7 @@ export const getModules = async () => {
   });
   return modules;
 };
-export const getModuleById = async (moduleId: string) => {
+export const getModuleById = async (moduleId: number) => {
   const module = await db.module.findUnique({
     where: { id: moduleId },
     include: {
@@ -38,7 +38,7 @@ export const addModule = async (values: ModuleSchemaType) => {
     return { error: 'Invalid fields!' };
   }
 
-  const { code, level, name, trainerId, yearOfStudy } = validatedFields.data;
+  const { code, level, name, trainerId } = validatedFields.data;
 
   const existingModule = await db.module.findFirst({
     where: { name },
@@ -54,7 +54,6 @@ export const addModule = async (values: ModuleSchemaType) => {
       level,
       name,
       trainerId,
-      yearOfStudy,
     },
   });
 
@@ -65,7 +64,7 @@ export const addModule = async (values: ModuleSchemaType) => {
   };
 };
 
-export const editModule = async (values: ModuleSchemaType, id: string) => {
+export const editModule = async (values: ModuleSchemaType, id: number) => {
   const user = await currentUser();
 
   if (!user) {
@@ -82,7 +81,7 @@ export const editModule = async (values: ModuleSchemaType, id: string) => {
   return { success: 'User Account Updated !' };
 };
 
-export async function DeleteModule(id: string) {
+export async function DeleteModule(id: number) {
   const module = await db.module.findUnique({
     where: {
       id,
