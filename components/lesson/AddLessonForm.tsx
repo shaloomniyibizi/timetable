@@ -13,11 +13,23 @@ import {
 import { Input } from '../ui/input';
 
 import { addLesson } from '@/lib/actions/lesson.action';
+import { getModules } from '@/lib/actions/module.action';
+import { getTrainers } from '@/lib/actions/trainer.action';
 import { DAYS_OF_WEEK_IN_ORDER } from '@/lib/constants';
 import { timeToInt } from '@/lib/utils';
 import { LessonSchemaa, LessonSchemaaType } from '@/lib/validation/lesson';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 import { useFieldArray, useForm } from 'react-hook-form';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 type Availability = {
   startTime: string;
@@ -35,6 +47,15 @@ const AddLessonForm = ({
   };
 }) => {
   const [successMessage, setSuccessMessage] = useState<string>();
+
+  const { data: modules } = useQuery({
+    queryKey: ['modules'],
+    queryFn: async () => await getModules(),
+  });
+  const { data: trainers } = useQuery({
+    queryKey: ['trainers'],
+    queryFn: async () => await getTrainers(),
+  });
 
   // 1. Define your form.
   const form = useForm<LessonSchemaaType>({
@@ -73,7 +94,7 @@ const AddLessonForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='flex gap-6 flex-col'
+        className='flex gap-6 flex-col max-w-6xl mx-auto py-4'
       >
         {form.formState.errors.root && (
           <div className='text-destructive text-sm'>
@@ -99,8 +120,8 @@ const AddLessonForm = ({
                       day,
                       startTime: '08:00',
                       endTime: '09:20',
-                      trainerId: 'cm27mxsye000312recqdz1h0a',
-                      moduleId: 'cm27n11gc000512rejx5qp637',
+                      trainerId: '',
+                      moduleId: '',
                     });
                   }}
                 >
@@ -146,14 +167,31 @@ const AddLessonForm = ({
                         control={form.control}
                         name={`availabilities.${field.index}.trainerId`}
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className='w-full flex-1'>
                             <FormControl>
-                              <Input
-                                className='w-24'
-                                aria-label={`${day} trainerId`}
-                                {...field}
-                              />
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger className='w-full'>
+                                  <SelectValue placeholder='Select your Trainer' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Trainers</SelectLabel>
+                                    {trainers?.map((trainer, i) => (
+                                      <SelectItem
+                                        key={trainer.user.name + i}
+                                        value={trainer.id}
+                                      >
+                                        <p>{trainer.user.name}</p>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -161,14 +199,31 @@ const AddLessonForm = ({
                         control={form.control}
                         name={`availabilities.${field.index}.moduleId`}
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className='w-full flex-1'>
                             <FormControl>
-                              <Input
-                                className='w-24'
-                                aria-label={`${day} trainerId`}
-                                {...field}
-                              />
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger className='w-full'>
+                                  <SelectValue placeholder='Select your Module' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Modules</SelectLabel>
+                                    {modules?.map((module, i) => (
+                                      <SelectItem
+                                        key={module.name + i}
+                                        value={module.id}
+                                      >
+                                        <p>{module.name}</p>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
