@@ -33,8 +33,24 @@ export const SideBarMenu = [
   },
   {
     role: 'DAS',
+    title: 'Weekly Lessons',
+    icon: <School className='transition-all group-hover:scale-110' />,
+    href: '/lessons',
+  },
+  {
+    role: 'DAS',
     title: 'Time Table',
     icon: <AlarmClock className='transition-all group-hover:scale-110' />,
     href: '/timetable',
   },
 ];
+
+export const DAYS_OF_WEEK_IN_ORDER = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+] as const;

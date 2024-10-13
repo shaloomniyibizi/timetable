@@ -15,7 +15,7 @@ model Account {
   providerAccountId String
   refresh_token     String? @db.Text
   access_token      String? @db.Text
-  expires_at        Int?
+  expires_at        String?
   token_type        String?
   scope             String?
   id_token          String? @db.Text
@@ -30,19 +30,6 @@ model Account {
   @@map("accounts")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("sessions")
-}
-
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -50,15 +37,12 @@ model User {
   phoneNumber   String?   @unique
   address       String?
   image         String?
-  sex           UserSex?
   password      String?
-  role          Role      @default(STUDENT)
-  birthday      DateTime?
+  role          Role      @default(TRAINER)
   emailVerified DateTime?
   accounts      Account[]
-  sessions      Session[]
   trainer       Trainer?
-  student       Student?
+  onboarded     Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -66,25 +50,12 @@ model User {
   @@map("users")
 }
 
-model Student {
-  id           String     @id @default(cuid())
-  userId       String     @unique
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  roomId       Int
-  room         Room       @relation(fields: [roomId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Trainer {
   id           String     @id @default(cuid())
   userId       String     @unique
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   departmentId String
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id])
   modules      Module[]
   lessons      Lesson[]
   rooms        Room[]
@@ -99,7 +70,6 @@ model Department {
   id      String    @id @default(cuid())
   name    String
   trainer Trainer[]
-  student Student[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,12 +78,11 @@ model Department {
 }
 
 model Room {
-  id             Int              @id @default(autoincrement())
+  id             String           @id @default(cuid())
   name           String           @unique
-  capacity       Int
+  capacity       String
   supervisorId   String?
   supervisor     Trainer?         @relation(fields: [supervisorId], references: [id])
-  students       Student[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   TimetableEntry TimetableEntry[]
@@ -122,7 +91,7 @@ model Room {
 }
 
 model Module {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String   @unique
   code      String   @unique
   level     String
@@ -137,32 +106,25 @@ model Module {
 }
 
 model Lesson {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  moduleId       Int
+  id             String           @id @default(cuid())
+  name           String?
+  day            Day
+  startTime      String
+  endTime        String
+  moduleId       String
   module         Module           @relation(fields: [moduleId], references: [id])
   trainerId      String
   trainer        Trainer          @relation(fields: [trainerId], references: [id])
   TimetableEntry TimetableEntry[]
 }
 
-model TimeSlot {
-  id             Int              @id @default(autoincrement())
-  day            Day
-  startTime      DateTime
-  endTime        DateTime
-  TimetableEntry TimetableEntry[]
-}
-
 model TimetableEntry {
-  id         Int      @id @default(autoincrement())
-  lessonId   Int
-  roomId     Int
-  timeSlotId Int
-  lesson     Lesson   @relation(fields: [lessonId], references: [id])
-  room       Room     @relation(fields: [roomId], references: [id])
-  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id])
+  id         String @id @default(cuid())
+  lessonId   String
+  roomId     String
+  timeSlotId String
+  lesson     Lesson @relation(fields: [lessonId], references: [id])
+  room       Room   @relation(fields: [roomId], references: [id])
 }
 
 model VerificationToken {
@@ -194,18 +156,14 @@ enum Role {
   HOD
   DAS
   TRAINER
-  STUDENT
-}
-
-enum UserSex {
-  MALE
-  FEMALE
 }
 
 enum Day {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
+  Sunday
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
 }

@@ -2,7 +2,6 @@
 
 import { DataTableColumnHeader } from '@/components/datatable/ColumnHeader';
 import { ColumnToggle } from '@/components/datatable/ColumnToggle';
-import { DataTableFacetedFilter } from '@/components/datatable/FacetedFilter';
 import SkeletonWrapper from '@/components/shared/SkeletonWrapper';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getModules, GetModulesType } from '@/lib/actions/module.action';
-import { cn } from '@/lib/utils';
+import { getLessons, GetLessonsType } from '@/lib/actions/lesson.action';
 import { useQuery } from '@tanstack/react-query';
 import {
   ColumnDef,
@@ -44,67 +42,63 @@ import {
   TrashIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import DeleteModuleDialog from './DeleteModuleDialog';
-import EditModuleDialog from './EditModuleDialog';
+import { useState } from 'react';
+import DeleteLessonDialog from './DeleteLessonDialog';
+import EditLessonDialog from './EditLessonDialog';
 
 const emptyData: any[] = [];
 
-type ModuleRow = GetModulesType[0];
+type LessonRow = GetLessonsType[0];
 
-const columns: ColumnDef<ModuleRow>[] = [
+const columns: ColumnDef<LessonRow>[] = [
   {
-    accessorKey: 'code',
+    accessorKey: 'moduleId',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Module Code' />
+      <DataTableColumnHeader column={column} title='Module Name' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.code}</div>
+      <div className='text-nowrap capitalize'>{row.original.module.name}</div>
     ),
   },
   {
-    accessorKey: 'name',
+    accessorKey: 'trainerId',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
-    ),
-    cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.name!}</div>
-    ),
-  },
-
-  {
-    accessorKey: 'level',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Level' />
+      <DataTableColumnHeader column={column} title='Trainer Name' />
     ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
     cell: ({ row }) => (
-      <div className='text-nowrap capitalize'>{row.original.level}</div>
-    ),
-  },
-  {
-    accessorKey: 'trainer',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Trainer' />
-    ),
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-    cell: ({ row }) => (
-      <div className={cn('rounded-lg p-2 text-center capitalize')}>
-        {row.original.trainer?.user.name}
+      <div className='text-nowrap capitalize'>
+        {row.original.trainer.user.name}
       </div>
+    ),
+  },
+  {
+    accessorKey: 'startTime',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Lesson Start Time' />
+    ),
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>{row.original.startTime!}</div>
+    ),
+  },
+  {
+    accessorKey: 'endTime',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Lesson End Time' />
+    ),
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>{row.original.endTime!}</div>
     ),
   },
   {
     id: 'actions',
     enableHiding: false,
-    cell: ({ row }) => <RowActions module={row.original} />,
+    cell: ({ row }) => <RowActions lesson={row.original} />,
   },
 ];
 
@@ -114,13 +108,13 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
 });
 
-function ModuleTable() {
+function LessonTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const { data: modules, isFetching } = useQuery<GetModulesType>({
-    queryKey: ['modules'],
-    queryFn: async () => await getModules(),
+  const { data: lessons, isFetching } = useQuery<GetLessonsType>({
+    queryKey: ['lessons'],
+    queryFn: async () => await getLessons(),
   });
 
   const handleExportCSV = (data: any[]) => {
@@ -129,7 +123,7 @@ function ModuleTable() {
   };
 
   const table = useReactTable({
-    data: modules || emptyData,
+    data: lessons || emptyData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     initialState: {
@@ -148,32 +142,9 @@ function ModuleTable() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const levelOptions = useMemo(() => {
-    const levelMap = new Map();
-    modules?.forEach((module) => {
-      levelMap.set(module?.level, {
-        value: module.level,
-        label: module.level,
-      });
-    });
-    const uniqueLevel = new Set(levelMap.values());
-    return Array.from(uniqueLevel);
-  }, [modules]);
-
   return (
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
-        <div className='flex gap-2'>
-          <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('level') && (
-              <DataTableFacetedFilter
-                options={levelOptions}
-                title='Level'
-                column={table.getColumn('level')}
-              />
-            )}
-          </SkeletonWrapper>
-        </div>
         <div className='flex flex-wrap gap-2'>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
             <ColumnToggle table={table} />
@@ -186,10 +157,10 @@ function ModuleTable() {
               onClick={() => {
                 const data = table.getFilteredRowModel().rows.map((row) => ({
                   NO: row.original.id,
-                  MODULECODE: row.original.code,
-                  MODULENAME: row.original.name,
-                  MODULELEVEL: row.original.level,
-                  TRAINER: row.original.trainer.user.name,
+                  MODULENAME: row.original.module.name,
+                  TRAINERNAME: row.original.trainer.user.name,
+                  STATTIME: row.original.startTime,
+                  ENDTIME: row.original.ENDTime,
                 }));
                 handleExportCSV(data);
               }}
@@ -199,7 +170,7 @@ function ModuleTable() {
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
             <Button asChild size='sm' className='h-8 gap-1'>
-              <Link href={'/modules/add'}>
+              <Link href={'/lessons/add'}>
                 <PlusCircle className='h-3.5 w-3.5' />
                 <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
                   Add New
@@ -283,23 +254,23 @@ function ModuleTable() {
   );
 }
 
-export default ModuleTable;
+export default LessonTable;
 
-function RowActions({ module }: { module: ModuleRow }) {
+function RowActions({ lesson }: { lesson: LessonRow }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   return (
     <>
-      <DeleteModuleDialog
+      <DeleteLessonDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
-        moduleId={module.id}
+        lessonId={lesson.id}
       />
-      <EditModuleDialog
+      <EditLessonDialog
         open={showEditDialog}
         setOpen={setShowEditDialog}
-        moduleId={module.id}
+        lessonId={lesson.id}
       />
       <DropdownMenu>
         <div className='flex w-full items-center justify-center'>

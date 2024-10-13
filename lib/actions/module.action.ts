@@ -17,7 +17,7 @@ export const getModules = async () => {
   });
   return modules;
 };
-export const getModuleById = async (moduleId: number) => {
+export const getModuleById = async (moduleId: string) => {
   const module = await db.module.findUnique({
     where: { id: moduleId },
     include: {
@@ -64,7 +64,7 @@ export const addModule = async (values: ModuleSchemaType) => {
   };
 };
 
-export const editModule = async (values: ModuleSchemaType, id: number) => {
+export const editModule = async (values: ModuleSchemaType, id: string) => {
   const user = await currentUser();
 
   if (!user) {
@@ -81,7 +81,7 @@ export const editModule = async (values: ModuleSchemaType, id: number) => {
   return { success: 'User Account Updated !' };
 };
 
-export async function DeleteModule(id: number) {
+export async function DeleteModule(id: string) {
   const module = await db.module.findUnique({
     where: {
       id,

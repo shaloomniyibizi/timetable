@@ -10,29 +10,49 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
+import { DeleteLesson } from '@/lib/actions/lesson.action';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
-interface EditModuleDialogProps {
+interface DeleteLessonDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  moduleId: string;
+  lessonId: string;
 }
-function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
-  const router = useRouter();
+function DeleteLessonDialog({
+  open,
+  setOpen,
+  lessonId,
+}: DeleteLessonDialogProps) {
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: DeleteLesson,
+    onSuccess: async (data) => {
+      toast.success(data.success);
+
+      queryClient.invalidateQueries({
+        queryKey: ['lessons'],
+      });
+    },
+    onError: (error) => {
+      toast.success(error.message);
+    },
+  });
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You want to edit this module.
+            This action can not ne undone. This will permenently delete this
+            lesson
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              router.push(`/modules/edit/${moduleId}`);
+              deleteMutation.mutate(lessonId);
             }}
           >
             Continue
@@ -43,4 +63,4 @@ function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
   );
 }
 
-export default EditModuleDialog;
+export default DeleteLessonDialog;

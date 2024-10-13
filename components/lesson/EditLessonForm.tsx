@@ -3,6 +3,7 @@
 import CustomFormField, {
   FormFieldType,
 } from '@/components/shared/CustomFormField';
+import SubmitButton from '@/components/shared/SubmitButton';
 import {
   Card,
   CardContent,
@@ -11,34 +12,37 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Form, FormDescription } from '@/components/ui/form';
-
-import { addRoom } from '@/lib/actions/room.action';
+import { Form } from '@/components/ui/form';
+import { editLesson } from '@/lib/actions/lesson.action';
 import { getTrainers } from '@/lib/actions/trainer.action';
-import { RoomSchema, RoomSchemaType } from '@/lib/validation/room';
+import { LessonSchema, LessonSchemaType } from '@/lib/validation/lesson';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Lesson } from '@prisma/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { BeatLoader } from 'react-spinners';
 import { toast } from 'react-toastify';
-import SubmitButton from '../shared/SubmitButton';
 
-const AddRoomForm = () => {
+interface Props {
+  lesson: Lesson;
+}
+const EditLessonForm = ({ lesson }: Props) => {
   const { update } = useSession();
+
   const router = useRouter();
+
+  const queryClient = useQueryClient();
 
   const { data: trainers } = useQuery({
     queryKey: ['trainers'],
     queryFn: async () => await getTrainers(),
   });
 
-  const queryClient = useQueryClient();
-
-  const { mutate: AddRoom, isPending } = useMutation({
-    mutationFn: async (values: RoomSchemaType) => {
-      return await addRoom(values);
+  const { mutate: EditLesson, isPending } = useMutation({
+    mutationFn: async (values: LessonSchemaType) => {
+      return await editLesson(values, lesson.id);
     },
     onSuccess: (data) => {
       if (data.error) {
@@ -47,12 +51,12 @@ const AddRoomForm = () => {
 
       if (data.success) {
         update();
-        router.refresh();
         toast.success(data.success);
+        router.refresh();
         router.back();
       }
       queryClient.invalidateQueries({
-        queryKey: ['room'],
+        queryKey: ['lessons'],
       });
     },
 
@@ -62,31 +66,26 @@ const AddRoomForm = () => {
   });
 
   // 1. Define your form.
-  const form = useForm<RoomSchemaType>({
-    resolver: zodResolver(RoomSchema),
+  const form = useForm<LessonSchemaType>({
+    resolver: zodResolver(LessonSchema),
     defaultValues: {
-      name: '',
-      capacity: '',
+      name: lesson.name || undefined,
+      capacity: lesson?.capacity || undefined,
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: RoomSchemaType) {
-    AddRoom(values);
+  function onSubmit(values: LessonSchemaType) {
+    EditLesson(values);
   }
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='mx-auto min-w-min'
-      >
-        <Card className='w-full mt-2'>
-          <CardHeader className='text-center'>
-            <CardTitle className='text-2xl font-semibold'>
-              ⚙️ Add new room
-            </CardTitle>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Lesson Updation</CardTitle>
             <CardDescription>
-              Provide all information to add new room.
+              update your lesson information to secure your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -94,24 +93,21 @@ const AddRoomForm = () => {
               fieldType={FormFieldType.INPUT}
               control={form.control}
               name='name'
-              placeholder='Enter Room Name'
-              label='Room Name'
+              placeholder='Enter Lesson Name'
+              label='Lesson Name'
               disabled={isPending}
             />
             <CustomFormField
               fieldType={FormFieldType.INPUT}
               control={form.control}
               name='capacity'
-              placeholder='Enter Room Capacity'
-              label='Room Capacity'
+              placeholder='Enter Lesson Capacity'
+              label='Lesson Capacity'
               disabled={isPending}
             />
-            <FormDescription>Number of student in room</FormDescription>
           </CardContent>
           <CardFooter className='border-t px-6 py-4'>
-            <SubmitButton isLoading={isPending}>
-              {isPending ? <BeatLoader /> : 'Add Room'}
-            </SubmitButton>
+            <SubmitButton isLoading={isPending}>Update Lesson</SubmitButton>
           </CardFooter>
         </Card>
       </form>
@@ -119,4 +115,4 @@ const AddRoomForm = () => {
   );
 };
 
-export default AddRoomForm;
+export default EditLessonForm;

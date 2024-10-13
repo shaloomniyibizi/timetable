@@ -14,15 +14,10 @@ export const addDepartment = async (values: departmentSchemaType) => {
 
   if (!user) redirect('/login');
 
-  const { name, HODId } = parsedBody.data;
+  const { name } = parsedBody.data;
   const department = await db.department.create({
     data: {
       name,
-      hod: {
-        connect: {
-          id: HODId,
-        },
-      },
     },
   });
 

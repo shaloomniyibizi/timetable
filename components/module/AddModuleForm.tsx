@@ -175,10 +175,10 @@ const AddModuleForm = () => {
                             <p>Level 6 Year 1</p>
                           </SelectItem>
                           <SelectItem value='Level 7 Year 1'>
-                            <p>Level 7 Year 1</p>
+                            <p>Level 6 Year 2</p>
                           </SelectItem>
                           <SelectItem value='Level 7 Year 2'>
-                            <p>Level 7 Year 2</p>
+                            <p>Level 7 Year 3</p>
                           </SelectItem>
                         </SelectGroup>
                       </SelectContent>

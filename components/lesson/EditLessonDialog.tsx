@@ -12,12 +12,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
 
-interface EditModuleDialogProps {
+interface EditLessonDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  moduleId: string;
+  lessonId: string;
 }
-function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
+function EditLessonDialog({ open, setOpen, lessonId }: EditLessonDialogProps) {
   const router = useRouter();
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -25,14 +25,14 @@ function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You want to edit this module.
+            You want to edit this lesson.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              router.push(`/modules/edit/${moduleId}`);
+              router.push(`/lessons/edit/${lessonId}`);
             }}
           >
             Continue
@@ -43,4 +43,4 @@ function EditModuleDialog({ open, setOpen, moduleId }: EditModuleDialogProps) {
   );
 }
 
-export default EditModuleDialog;
+export default EditLessonDialog;

@@ -9,7 +9,7 @@ export const getRooms = async () => {
   const rooms = await db.room.findMany();
   return rooms;
 };
-export const getRoomById = async (roomId: number) => {
+export const getRoomById = async (roomId: string) => {
   const room = await db.room.findUnique({
     where: { id: roomId },
   });
@@ -47,7 +47,7 @@ export const addRoom = async (values: RoomSchemaType) => {
   };
 };
 
-export const editRoom = async (values: RoomSchemaType, id: number) => {
+export const editRoom = async (values: RoomSchemaType, id: string) => {
   const user = await currentUser();
 
   if (!user) {
@@ -64,7 +64,7 @@ export const editRoom = async (values: RoomSchemaType, id: number) => {
   return { success: 'User Account Updated !' };
 };
 
-export async function DeleteRoom(id: number) {
+export async function DeleteRoom(id: string) {
   const room = await db.room.findUnique({
     where: {
       id,

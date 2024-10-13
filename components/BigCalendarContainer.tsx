@@ -3,18 +3,18 @@ import { adjustScheduleToCurrentWeek } from '@/lib/utils';
 import BigCalendar from './BigCalender';
 
 const BigCalendarContainer = async () => {
-  const dataRes = await db.timetableEntry.findMany({
+  const dataRes = await db.lesson.findMany({
     include: {
-      lesson: true,
-      room: true,
-      timeSlot: true,
+      trainer: true,
+      module: true,
     },
   });
 
   const data = dataRes.map((datas) => ({
-    title: datas.lesson.name,
-    start: datas.timeSlot.startTime,
-    end: datas.timeSlot.endTime,
+    title: datas.module.name,
+    day: datas.day,
+    start: datas.startTime,
+    end: datas.endTime,
   }));
 
   const schedule = adjustScheduleToCurrentWeek(data);
