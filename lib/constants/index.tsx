@@ -43,6 +43,12 @@ export const SideBarMenu = [
     icon: <AlarmClock className='transition-all group-hover:scale-110' />,
     href: '/timetable',
   },
+  {
+    role: 'TRAINER',
+    title: 'Time Table',
+    icon: <AlarmClock className='transition-all group-hover:scale-110' />,
+    href: '/timetable',
+  },
 ];
 
 export const DAYS_OF_WEEK_IN_ORDER = [

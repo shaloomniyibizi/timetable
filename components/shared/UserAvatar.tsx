@@ -5,6 +5,7 @@ import { useCurrentUser } from '@/lib/hooks';
 import { ExtendedUser } from '@/lib/types/next-auth';
 import { AvatarProps } from '@radix-ui/react-avatar';
 import { useQuery } from '@tanstack/react-query';
+import { User } from 'lucide-react';
 
 interface UserAvatarProps extends AvatarProps {
   users?: Pick<ExtendedUser, 'image' | 'name'>;
@@ -20,10 +21,7 @@ export function UserAvatar({ users, ...props }: UserAvatarProps) {
     <Avatar {...props}>
       <AvatarImage src={user?.image!} alt={user?.name!} />
       <AvatarFallback>
-        {user
-          ?.name!.split(' ')
-          .map((chunk) => chunk[0])
-          .join('')}
+        <User />
       </AvatarFallback>
     </Avatar>
   );

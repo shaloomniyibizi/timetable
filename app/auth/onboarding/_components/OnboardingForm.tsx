@@ -151,10 +151,7 @@ const OnboardingForm = ({ user }: Props) => {
             <CardTitle className='text-2xl font-semibold'>
               ⚙️ Onboarding
             </CardTitle>
-            <CardDescription>
-              Fill the missing information that is used to identify you on Smart
-              research assistant app.
-            </CardDescription>
+            <CardDescription>Fill the missing information</CardDescription>
           </CardHeader>
           <CardContent>
             <FormField
