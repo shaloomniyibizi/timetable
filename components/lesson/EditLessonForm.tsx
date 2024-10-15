@@ -1,29 +1,38 @@
 'use client';
 
-import CustomFormField, {
-  FormFieldType,
-} from '@/components/shared/CustomFormField';
-import SubmitButton from '@/components/shared/SubmitButton';
+import { Fragment } from 'react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '../ui/form';
+
 import { editLesson } from '@/lib/actions/lesson.action';
 import { getTrainers } from '@/lib/actions/trainer.action';
 import { LessonSchema, LessonSchemaType } from '@/lib/validation/lesson';
-
 import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+
+import { getModules } from '@/lib/actions/module.action';
+import { DAYS_OF_WEEK_IN_ORDER } from '@/lib/constants';
 import { Lesson } from '@prisma/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import CustomFormField, { FormFieldType } from '../shared/CustomFormField';
+import SubmitButton from '../shared/SubmitButton';
 
 interface Props {
   lesson: Lesson;
@@ -35,6 +44,10 @@ const EditLessonForm = ({ lesson }: Props) => {
 
   const queryClient = useQueryClient();
 
+  const { data: modules } = useQuery({
+    queryKey: ['modules'],
+    queryFn: async () => await getModules(),
+  });
   const { data: trainers } = useQuery({
     queryKey: ['trainers'],
     queryFn: async () => await getTrainers(),
@@ -61,7 +74,7 @@ const EditLessonForm = ({ lesson }: Props) => {
     },
 
     onError: (e) => {
-      toast.loading(`Error: ${e.message}`);
+      toast.error(`Error: ${e.message}`);
     },
   });
 
@@ -69,8 +82,11 @@ const EditLessonForm = ({ lesson }: Props) => {
   const form = useForm<LessonSchemaType>({
     resolver: zodResolver(LessonSchema),
     defaultValues: {
-      name: lesson.name || undefined,
-      capacity: lesson?.capacity || undefined,
+      day: undefined,
+      startTime: lesson.startTime || undefined,
+      endTime: lesson.endTime || undefined,
+      moduleId: lesson.moduleId || undefined,
+      trainerId: lesson.trainerId || undefined,
     },
   });
 
@@ -80,36 +96,131 @@ const EditLessonForm = ({ lesson }: Props) => {
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Lesson Updation</CardTitle>
-            <CardDescription>
-              update your lesson information to secure your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CustomFormField
-              fieldType={FormFieldType.INPUT}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className='flex gap-6 flex-col max-w-6xl mx-auto py-4'
+      >
+        <div className='grid grid-cols-[auto,1fr] gap-y-6 gap-x-4'>
+          <Fragment>
+            <FormField
               control={form.control}
-              name='name'
-              placeholder='Enter Lesson Name'
-              label='Lesson Name'
-              disabled={isPending}
+              name={`day`}
+              render={({ field }) => (
+                <FormItem className='w-full flex-1'>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className='w-full'>
+                        <SelectValue placeholder='Select Day' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Day</SelectLabel>
+                          {DAYS_OF_WEEK_IN_ORDER?.map((day, i) => (
+                            <SelectItem key={day + i} value={day}>
+                              <p>{day}</p>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <CustomFormField
-              fieldType={FormFieldType.INPUT}
-              control={form.control}
-              name='capacity'
-              placeholder='Enter Lesson Capacity'
-              label='Lesson Capacity'
-              disabled={isPending}
-            />
-          </CardContent>
-          <CardFooter className='border-t px-6 py-4'>
-            <SubmitButton isLoading={isPending}>Update Lesson</SubmitButton>
-          </CardFooter>
-        </Card>
+            <div className='flex flex-col gap-2'>
+              <CustomFormField
+                fieldType={FormFieldType.INPUT}
+                control={form.control}
+                name='startTime'
+                placeholder='Enter Start Time'
+                label='Start Time'
+                disabled={isPending}
+              />
+              <CustomFormField
+                fieldType={FormFieldType.INPUT}
+                control={form.control}
+                name='endTime'
+                placeholder='Enter Start Time'
+                label='Start Time'
+                disabled={isPending}
+              />
+              <FormField
+                control={form.control}
+                name={`trainerId`}
+                render={({ field }) => (
+                  <FormItem className='w-full flex-1'>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className='w-full'>
+                          <SelectValue placeholder='Select your Trainer' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Trainers</SelectLabel>
+                            {trainers?.map((trainer, i) => (
+                              <SelectItem
+                                key={trainer.user.name + i}
+                                value={trainer.id}
+                              >
+                                <p>{trainer.user.name}</p>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`moduleId`}
+                render={({ field }) => (
+                  <FormItem className='w-full flex-1'>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className='w-full'>
+                          <SelectValue placeholder='Select your Module' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Modules</SelectLabel>
+                            {modules?.map((module, i) => (
+                              <SelectItem
+                                key={module.name + i}
+                                value={module.id}
+                              >
+                                <p>{module.name}</p>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </Fragment>
+        </div>
+
+        <div className='flex gap-2 justify-end'>
+          <SubmitButton className='max-w-sm' isLoading={isPending}>
+            Update Lesson
+          </SubmitButton>
+        </div>
       </form>
     </Form>
   );

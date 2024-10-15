@@ -63,7 +63,11 @@ export const editLesson = async (values: LessonSchemaType, id: string) => {
     },
   });
 
-  return { success: 'User Account Updated !' };
+  if (lesson) {
+    return { error: 'Fail Updated !' };
+  }
+
+  return { success: 'Lesson Updated !' };
 };
 
 export async function DeleteLesson(id: string) {

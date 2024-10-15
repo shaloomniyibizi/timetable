@@ -96,6 +96,15 @@ const columns: ColumnDef<LessonRow>[] = [
     ),
   },
   {
+    accessorKey: 'day',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Conducted Day' />
+    ),
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>{row.original.day!}</div>
+    ),
+  },
+  {
     id: 'actions',
     enableHiding: false,
     cell: ({ row }) => <RowActions lesson={row.original} />,
@@ -160,7 +169,8 @@ function LessonTable() {
                   MODULENAME: row.original.module.name,
                   TRAINERNAME: row.original.trainer.user.name,
                   STATTIME: row.original.startTime,
-                  ENDTIME: row.original.ENDTime,
+                  ENDTIME: row.original.endTime,
+                  CONDUCTEDDAY: row.original.day,
                 }));
                 handleExportCSV(data);
               }}
