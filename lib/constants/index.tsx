@@ -1,5 +1,6 @@
 import {
   AlarmClock,
+  BookImage,
   NotebookTabs,
   School,
   University,
@@ -20,6 +21,12 @@ export const SideBarMenu = [
     href: '/trainers',
   },
   {
+    role: 'DAS',
+    title: 'Trainers',
+    icon: <Users className='transition-all group-hover:scale-110' />,
+    href: '/trainers',
+  },
+  {
     role: 'HOD',
     title: 'Modules',
     icon: <NotebookTabs className='transition-all group-hover:scale-110' />,
@@ -34,7 +41,7 @@ export const SideBarMenu = [
   {
     role: 'DAS',
     title: 'Weekly Lessons',
-    icon: <School className='transition-all group-hover:scale-110' />,
+    icon: <BookImage className='transition-all group-hover:scale-110' />,
     href: '/lessons',
   },
   {

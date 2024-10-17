@@ -22,6 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getTrainers, GetTrainersType } from '@/lib/actions/trainer.action';
+import { useCurrentRole } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -151,6 +152,8 @@ function UserTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const role = useCurrentRole();
+
   const { data: trainers, isFetching } = useQuery<GetTrainersType>({
     queryKey: ['trainers'],
     queryFn: async () => await getTrainers(),
@@ -254,14 +257,16 @@ function UserTable() {
             </Button>
           </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            <Button asChild size='sm' className='h-8 gap-1'>
-              <Link href={'/trainers/add'}>
-                <PlusCircle className='h-3.5 w-3.5' />
-                <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
-                  Add New
-                </span>
-              </Link>
-            </Button>
+            {role === 'HOD' && (
+              <Button asChild size='sm' className='h-8 gap-1'>
+                <Link href={'/trainers/add'}>
+                  <PlusCircle className='h-3.5 w-3.5' />
+                  <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>
+                    Add New
+                  </span>
+                </Link>
+              </Button>
+            )}
           </SkeletonWrapper>
         </div>
       </div>

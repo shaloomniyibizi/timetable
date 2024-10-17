@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { editTrainer } from '@/lib/actions/trainer.action';
+import { useCurrentRole } from '@/lib/hooks';
 import { isBase64Image } from '@/lib/utils';
 import { useUploadThing } from '@/lib/utils/uploadthing';
 import {
@@ -53,7 +54,7 @@ interface Props {
 }
 const EditTrainerForm = ({ user }: Props) => {
   const { update } = useSession();
-
+  const currentRole = useCurrentRole();
   const router = useRouter();
   const { startUpload } = useUploadThing('imageUploader');
 
@@ -73,7 +74,7 @@ const EditTrainerForm = ({ user }: Props) => {
         }
       }
       console.log(values);
-      return await editTrainer(values);
+      return await editTrainer(values, user.id);
     },
     onSuccess: (data) => {
       if (data.error) {
@@ -141,7 +142,8 @@ const EditTrainerForm = ({ user }: Props) => {
           <CardHeader>
             <CardTitle>Profile Settings</CardTitle>
             <CardDescription>
-              update your Profile information to secure your account.
+              only {currentRole} update your Profile information to secure your
+              account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -197,37 +199,39 @@ const EditTrainerForm = ({ user }: Props) => {
               placeholder='Enter Phone Number'
               label='Phone Number'
             />
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem className='w-full flex-1'>
-                  <FormLabel>Department</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select Trainer Title' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Trainer Role</SelectLabel>
-                          <SelectItem value={Role.HOD}>
-                            <p>H.O.D</p>
-                          </SelectItem>
-                          <SelectItem value={Role.TRAINER}>
-                            <p>Trainer</p>
-                          </SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {currentRole === 'DAS' && (
+              <FormField
+                control={form.control}
+                name='role'
+                render={({ field }) => (
+                  <FormItem className='w-full flex-1'>
+                    <FormLabel>Trainer Role</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className='w-full'>
+                          <SelectValue placeholder='Select Trainer Title' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Trainer Role</SelectLabel>
+                            <SelectItem value={Role.HOD}>
+                              <p>H.O.D</p>
+                            </SelectItem>
+                            <SelectItem value={Role.TRAINER}>
+                              <p>Trainer</p>
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </CardContent>
           <CardFooter className='border-t px-6 py-4'>
             <SubmitButton isLoading={isPending}>Update Trainer</SubmitButton>

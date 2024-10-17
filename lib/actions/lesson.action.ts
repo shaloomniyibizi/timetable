@@ -63,7 +63,7 @@ export const editLesson = async (values: LessonSchemaType, id: string) => {
     },
   });
 
-  if (lesson) {
+  if (!lesson) {
     return { error: 'Fail Updated !' };
   }
 

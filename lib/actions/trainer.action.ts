@@ -3,7 +3,6 @@
 import { db } from '@/lib/database/db';
 
 import { getUserByEmail, getUserById } from '@/lib/data/user';
-import { currentUser } from '@/lib/user.auth';
 import {
   EditTrainerSchemaType,
   TrainerSchema,
@@ -77,29 +76,22 @@ export const addTrainer = async (values: TrainerSchemaType) => {
   };
 };
 
-export const editTrainer = async (values: EditTrainerSchemaType) => {
-  const user = await currentUser();
-
-  if (!user) {
-    return { error: 'Unauthorized' };
-  }
-
-  const dbUser = await getUserById(user.id as string);
+export const editTrainer = async (
+  values: EditTrainerSchemaType,
+  id: string
+) => {
+  const dbUser = await getUserById(id);
 
   if (!dbUser) {
-    return { error: 'Unauthorized' };
+    return { error: 'This user does no more exist' };
   }
 
-  if (values.email && values.email !== user.email) {
+  if (values.email && values.email !== dbUser.email) {
     const existingUser = await getUserByEmail(values.email);
 
-    if (existingUser && existingUser.id !== user.id) {
+    if (existingUser && existingUser.id !== dbUser.id) {
       return { error: 'Email already in use!' };
     }
-  }
-
-  if (user.isOAuth) {
-    values.email = user.email!;
   }
 
   const updatedUser = await db.user.update({
