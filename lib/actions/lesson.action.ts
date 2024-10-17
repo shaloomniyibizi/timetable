@@ -13,6 +13,7 @@ export const getLessons = async () => {
   const lessons = await db.lesson.findMany({
     include: {
       module: true,
+      room: true,
       trainer: {
         include: {
           user: true,

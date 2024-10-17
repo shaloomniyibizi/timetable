@@ -96,6 +96,15 @@ const columns: ColumnDef<LessonRow>[] = [
     ),
   },
   {
+    accessorKey: 'roomId',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Room' />
+    ),
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>{row.original.room.name!}</div>
+    ),
+  },
+  {
     accessorKey: 'day',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Conducted Day' />
@@ -104,6 +113,7 @@ const columns: ColumnDef<LessonRow>[] = [
       <div className='text-nowrap capitalize'>{row.original.day!}</div>
     ),
   },
+
   {
     id: 'actions',
     enableHiding: false,
