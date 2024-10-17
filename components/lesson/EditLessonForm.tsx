@@ -24,6 +24,7 @@ import {
 } from '../ui/select';
 
 import { getModules } from '@/lib/actions/module.action';
+import { getRooms } from '@/lib/actions/room.action';
 import { DAYS_OF_WEEK_IN_ORDER } from '@/lib/constants';
 import { Lesson } from '@prisma/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -47,6 +48,10 @@ const EditLessonForm = ({ lesson }: Props) => {
   const { data: modules } = useQuery({
     queryKey: ['modules'],
     queryFn: async () => await getModules(),
+  });
+  const { data: rooms } = useQuery({
+    queryKey: ['rooms'],
+    queryFn: async () => await getRooms(),
   });
   const { data: trainers } = useQuery({
     queryKey: ['trainers'],
@@ -87,6 +92,7 @@ const EditLessonForm = ({ lesson }: Props) => {
       endTime: lesson.endTime || undefined,
       moduleId: lesson.moduleId || undefined,
       trainerId: lesson.trainerId || undefined,
+      roomId: lesson.roomId || undefined,
     },
   });
 
@@ -202,6 +208,35 @@ const EditLessonForm = ({ lesson }: Props) => {
                                 value={module.id}
                               >
                                 <p>{module.name}</p>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`roomId`}
+                render={({ field }) => (
+                  <FormItem className='w-full flex-1'>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className='w-full'>
+                          <SelectValue placeholder='Select Room' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Rooms</SelectLabel>
+                            {rooms?.map((room, i) => (
+                              <SelectItem key={room.name + i} value={room.id}>
+                                <p>{room.name}</p>
                               </SelectItem>
                             ))}
                           </SelectGroup>

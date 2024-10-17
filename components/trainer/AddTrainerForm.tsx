@@ -30,7 +30,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getDepartments } from '@/lib/actions/department.action';
-import { addTrainer } from '@/lib/actions/trainer.action';
+import { addTrainer, getTrainerByUserId } from '@/lib/actions/trainer.action';
+import { useCurrentUser } from '@/lib/hooks';
 import { TrainerSchema, TrainerSchemaType } from '@/lib/validation/trainer';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Role } from '@prisma/client';
@@ -45,10 +46,15 @@ import { Button } from '../ui/button';
 const AddTrainerForm = () => {
   const { update } = useSession();
   const router = useRouter();
+  const currentUser = useCurrentUser();
 
   const { data: departments } = useQuery({
     queryKey: ['departments'],
     queryFn: async () => await getDepartments(),
+  });
+  const { data: trainers } = useQuery({
+    queryKey: ['trainers'],
+    queryFn: async () => await getTrainerByUserId(currentUser?.id!),
   });
 
   const queryClient = useQueryClient();
@@ -86,7 +92,7 @@ const AddTrainerForm = () => {
       email: '',
       phoneNumber: '',
       password: '',
-      departmentId: '',
+      departmentId: trainers?.departmentId || '',
       role: 'TRAINER',
     },
   });

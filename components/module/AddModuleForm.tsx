@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { addModule } from '@/lib/actions/module.action';
-import { getTrainers } from '@/lib/actions/trainer.action';
+import { getTrainerByDepartment } from '@/lib/actions/trainer.action';
 import { ModuleSchema, ModuleSchemaType } from '@/lib/validation/module';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -47,7 +47,7 @@ const AddModuleForm = () => {
 
   const { data: trainers } = useQuery({
     queryKey: ['trainers'],
-    queryFn: async () => await getTrainers(),
+    queryFn: async () => await getTrainerByDepartment(),
   });
 
   const queryClient = useQueryClient();
