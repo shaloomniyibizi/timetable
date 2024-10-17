@@ -180,6 +180,7 @@ function LessonTable() {
                   TRAINERNAME: row.original.trainer.user.name,
                   STATTIME: row.original.startTime,
                   ENDTIME: row.original.endTime,
+                  ROOM: row.original.room.name,
                   CONDUCTEDDAY: row.original.day,
                 }));
                 handleExportCSV(data);
