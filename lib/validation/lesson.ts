@@ -9,6 +9,7 @@ export const LessonSchemaa = z.object({
         day: z.enum(DAYS_OF_WEEK_IN_ORDER),
         moduleId: z.string(),
         trainerId: z.string(),
+        roomId: z.string(),
         startTime: z
           .string()
           .regex(
@@ -61,6 +62,7 @@ export const LessonSchema = z.object({
   day: z.enum(DAYS_OF_WEEK_IN_ORDER),
   moduleId: z.string(),
   trainerId: z.string(),
+  roomId: z.string(),
   startTime: z
     .string()
     .regex(

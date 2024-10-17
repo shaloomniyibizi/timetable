@@ -14,6 +14,7 @@ import { Input } from '../ui/input';
 
 import { addLesson } from '@/lib/actions/lesson.action';
 import { getModules } from '@/lib/actions/module.action';
+import { getRooms } from '@/lib/actions/room.action';
 import { getTrainers } from '@/lib/actions/trainer.action';
 import { DAYS_OF_WEEK_IN_ORDER } from '@/lib/constants';
 import { timeToInt } from '@/lib/utils';
@@ -51,6 +52,10 @@ const AddLessonForm = ({
   const { data: modules } = useQuery({
     queryKey: ['modules'],
     queryFn: async () => await getModules(),
+  });
+  const { data: rooms } = useQuery({
+    queryKey: ['rooms'],
+    queryFn: async () => await getRooms(),
   });
   const { data: trainers } = useQuery({
     queryKey: ['trainers'],
@@ -122,6 +127,7 @@ const AddLessonForm = ({
                       endTime: '09:20',
                       trainerId: '',
                       moduleId: '',
+                      roomId: '',
                     });
                   }}
                 >
@@ -160,6 +166,38 @@ const AddLessonForm = ({
                                 {...field}
                               />
                             </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`availabilities.${field.index}.roomId`}
+                        render={({ field }) => (
+                          <FormItem className='w-full flex-1'>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger className='w-full'>
+                                  <SelectValue placeholder='Select Room' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Rooms</SelectLabel>
+                                    {rooms?.map((room, i) => (
+                                      <SelectItem
+                                        key={room.id + i}
+                                        value={room.id}
+                                      >
+                                        <p>{room.name}</p>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />

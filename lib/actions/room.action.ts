@@ -6,7 +6,9 @@ import { RoomSchema, RoomSchemaType } from '@/lib/validation/room';
 import { currentUser } from '../user.auth';
 
 export const getRooms = async () => {
-  const rooms = await db.room.findMany();
+  const rooms = await db.room.findMany({
+    include: { supervisor: { include: { user: true } } },
+  });
   return rooms;
 };
 export const getRoomById = async (roomId: string) => {
@@ -23,7 +25,7 @@ export const addRoom = async (values: RoomSchemaType) => {
     return { error: 'Invalid fields!' };
   }
 
-  const { name, capacity } = validatedFields.data;
+  const { name, capacity, supervisorId } = validatedFields.data;
 
   const existingRoom = await db.room.findFirst({
     where: { name },
@@ -37,6 +39,7 @@ export const addRoom = async (values: RoomSchemaType) => {
     data: {
       name,
       capacity,
+      supervisorId,
     },
   });
 

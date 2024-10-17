@@ -9,6 +9,7 @@ import {
   TrainerSchemaType,
 } from '@/lib/validation/trainer';
 import bcrypt from 'bcryptjs';
+import { currentUser } from '../user.auth';
 
 export const getTrainers = async () => {
   const trainers = await db.trainer.findMany({
@@ -20,9 +21,35 @@ export const getTrainers = async () => {
   });
   return trainers;
 };
+export const getTrainerByDepartment = async () => {
+  const user = await currentUser();
+  const train = await db.trainer.findFirst({
+    where: { userId: user?.id },
+  });
+  const trainer = await db.trainer.findMany({
+    where: { departmentId: train?.departmentId },
+    include: {
+      user: true,
+      department: true,
+      modules: true,
+    },
+  });
+  return trainer;
+};
 export const getTrainerById = async (trainerId: string) => {
   const trainer = await db.trainer.findUnique({
     where: { id: trainerId },
+    include: {
+      user: true,
+      department: true,
+      modules: true,
+    },
+  });
+  return trainer;
+};
+export const getTrainerByUserId = async (userId: string) => {
+  const trainer = await db.trainer.findUnique({
+    where: { userId },
     include: {
       user: true,
       department: true,

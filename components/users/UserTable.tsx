@@ -21,7 +21,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getTrainers, GetTrainersType } from '@/lib/actions/trainer.action';
+import {
+  getTrainerByDepartment,
+  GetTrainersType,
+} from '@/lib/actions/trainer.action';
 import { useCurrentRole } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -156,7 +159,7 @@ function UserTable() {
 
   const { data: trainers, isFetching } = useQuery<GetTrainersType>({
     queryKey: ['trainers'],
-    queryFn: async () => await getTrainers(),
+    queryFn: async () => await getTrainerByDepartment(),
   });
 
   const handleExportCSV = (data: any[]) => {
@@ -184,18 +187,6 @@ function UserTable() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const departmentOptions = useMemo(() => {
-    const departmentMap = new Map();
-    trainers?.forEach((user) => {
-      departmentMap.set(user?.user.name, {
-        value: user.user.name,
-        label: user.user.name,
-      });
-    });
-    const uniquDepartment = new Set(departmentMap.values());
-    return Array.from(uniquDepartment);
-  }, [trainers]);
-
   const roleOptions = useMemo(() => {
     const roleMap = new Map();
     trainers?.forEach((user) => {
@@ -212,15 +203,6 @@ function UserTable() {
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
         <div className='flex gap-2'>
-          <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {table.getColumn('department') && (
-              <DataTableFacetedFilter
-                options={departmentOptions}
-                title='Department'
-                column={table.getColumn('department')}
-              />
-            )}
-          </SkeletonWrapper>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
             {table.getColumn('role') && (
               <DataTableFacetedFilter
@@ -242,13 +224,11 @@ function UserTable() {
               className='ml-auto h-8 lg:flex'
               onClick={() => {
                 const data = table.getFilteredRowModel().rows.map((row) => ({
-                  NO: row.original.id,
-                  TITLE: row.original.name,
-                  EMAIL: row.original.email,
-                  STUTUS: row.original.role,
-                  DEPARTMENT: row.original.Department.name,
-                  PHONE: row.original.phoneNumber,
-                  DATE: row.original.createdAt,
+                  TITLE: row.original.user.name,
+                  EMAIL: row.original.user.email!,
+                  ROLE: row.original.user.role,
+                  DEPARTMENT: row.original.department.name,
+                  PHONE: row.original.user.phoneNumber,
                 }));
                 handleExportCSV(data);
               }}

@@ -7,5 +7,8 @@ export const RoomSchema = z.object({
   capacity: z
     .string({ required_error: 'room code is required' })
     .min(1, 'Room capacity is required'),
+  supervisorId: z
+    .string({ required_error: 'room code is required' })
+    .min(1, 'Room capacity is required'),
 });
 export type RoomSchemaType = z.infer<typeof RoomSchema>;

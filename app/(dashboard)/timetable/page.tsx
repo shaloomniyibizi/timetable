@@ -1,6 +1,6 @@
 import BigCalendarContainer from '@/components/BigCalendarContainer';
 
-const TimeTablePage = () => {
+const TimeTablePage = async () => {
   return (
     <div className='flex-1 p-4 flex gap-4 flex-col xl:flex-row'>
       <div className='w-full xl:w-2/3'>

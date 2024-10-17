@@ -176,6 +176,7 @@ const AddTrainerForm = () => {
                   <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Select
+                      disabled
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >

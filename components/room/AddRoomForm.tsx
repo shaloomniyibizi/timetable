@@ -11,7 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Form, FormDescription } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
 
 import { addRoom } from '@/lib/actions/room.action';
 import { getTrainers } from '@/lib/actions/trainer.action';
@@ -24,6 +31,15 @@ import { useForm } from 'react-hook-form';
 import { BeatLoader } from 'react-spinners';
 import { toast } from 'react-toastify';
 import SubmitButton from '../shared/SubmitButton';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 const AddRoomForm = () => {
   const { update } = useSession();
@@ -67,6 +83,7 @@ const AddRoomForm = () => {
     defaultValues: {
       name: '',
       capacity: '',
+      supervisorId: '',
     },
   });
 
@@ -107,6 +124,36 @@ const AddRoomForm = () => {
               disabled={isPending}
             />
             <FormDescription>Number of student in room</FormDescription>
+
+            <FormField
+              control={form.control}
+              name='supervisorId'
+              render={({ field }) => (
+                <FormItem className='w-full flex-1 mt-2'>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className='w-full'>
+                        <SelectValue placeholder='Select Room Supervisor' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Supervisors</SelectLabel>
+                          {trainers?.map((tainer, i) => (
+                            <SelectItem key={tainer.id + i} value={tainer.id}>
+                              <p>{tainer.user.name}</p>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
           <CardFooter className='border-t px-6 py-4'>
             <SubmitButton isLoading={isPending}>

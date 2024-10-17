@@ -3,18 +3,32 @@ import { db } from '../lib/database/db';
 
 async function main() {
   // Create departments
-  const department = await db.department.upsert({
-    where: { name: 'Computer Science' },
-    update: { name: 'Computer Science' },
+  const mechanical = await db.department.upsert({
+    where: { name: 'Mechanical Engineering' },
+    update: { name: 'Mechanical Engineering' },
     create: {
-      name: 'Computer Science',
+      name: 'Mechanical Engineering',
     },
   });
-  const department1 = await db.department.upsert({
-    where: { name: 'Computer Science' },
-    update: { name: 'Computer Science' },
+  const civil = await db.department.upsert({
+    where: { name: 'Civil Engineering' },
+    update: { name: 'Civil Engineering' },
     create: {
-      name: 'Multimedia',
+      name: 'Civil Engineering',
+    },
+  });
+  const hospitality = await db.department.upsert({
+    where: { name: 'Hospitality Management' },
+    update: { name: 'Hospitality Management' },
+    create: {
+      name: 'Hospitality Management',
+    },
+  });
+  const ICT = await db.department.upsert({
+    where: { name: 'ICT' },
+    update: { name: 'ICT' },
+    create: {
+      name: 'ICT',
     },
   });
 
@@ -67,10 +81,10 @@ async function main() {
 
   const trainer1 = await db.trainer.upsert({
     where: { userId: user1.id },
-    update: { userId: user1.id, departmentId: department.id },
+    update: { userId: user1.id, departmentId: ICT.id },
     create: {
       userId: user1.id,
-      departmentId: department.id,
+      departmentId: ICT.id,
     },
   });
 
@@ -98,10 +112,10 @@ async function main() {
 
   const trainer2 = await db.trainer.upsert({
     where: { userId: user2.id },
-    update: { userId: user2.id, departmentId: department.id },
+    update: { userId: user2.id, departmentId: ICT.id },
     create: {
       userId: user2.id,
-      departmentId: department.id,
+      departmentId: ICT.id,
     },
   });
 
@@ -129,10 +143,10 @@ async function main() {
 
   const trainer3 = await db.trainer.upsert({
     where: { userId: user3.id },
-    update: { userId: user3.id, departmentId: department1.id },
+    update: { userId: user3.id, departmentId: civil.id },
     create: {
       userId: user3.id,
-      departmentId: department1.id,
+      departmentId: civil.id,
     },
   });
 

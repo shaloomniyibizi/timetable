@@ -64,6 +64,17 @@ const columns: ColumnDef<RoomRow>[] = [
     ),
   },
   {
+    accessorKey: 'supervisorId',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Room Supervisor' />
+    ),
+    cell: ({ row }) => (
+      <div className='text-nowrap capitalize'>
+        {row.original.supervisor?.user.name}
+      </div>
+    ),
+  },
+  {
     accessorKey: 'capacity',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Capacity' />
@@ -119,42 +130,11 @@ function RoomTable() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  // const levelOptions = useMemo(() => {
-  //   const levelMap = new Map();
-  //   rooms?.forEach((room) => {
-  //     levelMap.set(room?.level, {
-  //       value: room.level,
-  //       label: room.level,
-  //     });
-  //   });
-  //   const uniqueLevel = new Set(levelMap.values());
-  //   return Array.from(uniqueLevel);
-  // }, [rooms]);
-
-  // const yearOptions = useMemo(() => {
-  //   const yearMap = new Map();
-  //   rooms?.forEach((room) => {
-  //     yearMap.set(room.yearOfStudy, {
-  //       value: room.yearOfStudy,
-  //       label: room.yearOfStudy,
-  //     });
-  //   });
-  //   const uniqueYear = new Set(yearMap.values());
-  //   return Array.from(uniqueYear);
-  // }, [rooms]);
-
   return (
     <div className='w-full'>
       <div className='flex flex-wrap items-end justify-between gap-2 py-4'>
         <div className='flex gap-2'>
           <SkeletonWrapper isLoading={isFetching} fullWidth={false}>
-            {/* {table.getColumn('level') && (
-              <DataTableFacetedFilter
-                options={levelOptions}
-                title='Level'
-                column={table.getColumn('level')}
-              />
-            )} */}
             <div className=''></div>
           </SkeletonWrapper>
         </div>
@@ -169,13 +149,9 @@ function RoomTable() {
               className='ml-auto h-8 lg:flex'
               onClick={() => {
                 const data = table.getFilteredRowModel().rows.map((row) => ({
-                  NO: row.original.id,
-                  TITLE: row.original.name,
-                  EMAIL: row.original.email,
-                  STUTUS: row.original.year,
-                  LEVEL: row.original.Level.name,
-                  PHONE: row.original.phoneNumber,
-                  DATE: row.original.createdAt,
+                  ROOM_NAME: row.original.name,
+                  ROOM_SUPERVISOR: row.original.supervisor?.user.name,
+                  ROOM_CAPACITY: row.original.capacity,
                 }));
                 handleExportCSV(data);
               }}
